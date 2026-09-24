@@ -315,7 +315,7 @@
     <section class="home" id="home">
 
         <div class="home-text">
-
+        <img src="/images/img 2.jpg" alt="">
             <h1>
                 Hi, I'm <span>Hidaya</span>
             </h1>
