@@ -30,7 +30,7 @@ function fileUrl(string $path): string {
 }
 
 /* ============================== PAGE START ============================== */
-function page_start(string $title, string $desc = ''): void {
+function page_start(string $title, string $desc = '', string $extraCss = ''): void {
     global $site; ?>
 <!DOCTYPE html>
 <html lang="fr" data-theme="light">
@@ -120,6 +120,7 @@ footer{background:var(--footer);color:var(--p100);text-align:center;padding:1.8r
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s}
 .reveal.show{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}.reveal{opacity:1;transform:none}}
+<?= $extraCss ?>
 </style>
 </head>
 <body>
