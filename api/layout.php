@@ -11,14 +11,14 @@ $site = [
     'filiere'  => 'Développement Digital — Option Web Full Stack',
 ];
 
-// Tes modules : code, titre, description
+// Tes modules : code, lien du bouton "Voir les TPs", titre, description
 $modules = [
-    'M201' => ['title' => 'Préparation d’un projet web',             'desc' => 'Préparation et organisation d’un projet de développement web.'],
-    'M202' => ['title' => 'Approche agile',                          'desc' => 'Méthodes et pratiques agiles utilisées dans la gestion des projets.'],
-    'M203' => ['title' => 'Gestion des données',                     'desc' => 'Conception, organisation et gestion des bases de données.'],
-    'M204' => ['title' => 'Développement front-end',                 'desc' => 'Création des interfaces web avec HTML, CSS et JavaScript.'],
-    'M205' => ['title' => 'Développement back-end',                  'desc' => 'Développement côté serveur avec PHP et gestion des fonctionnalités web.'],
-    'M206' => ['title' => 'Création d’une application Cloud native', 'desc' => 'Développement et déploiement d’applications adaptées au Cloud.'],
+    'M201' => ['link' => 'tps.php?module=M201', 'title' => 'Préparation d’un projet web',             'desc' => 'Préparation et organisation d’un projet de développement web.'],
+    'M202' => ['link' => 'tps.php?module=M202', 'title' => 'Approche agile',                          'desc' => 'Méthodes et pratiques agiles utilisées dans la gestion des projets.'],
+    'M203' => ['link' => 'tps.php?module=M203', 'title' => 'Gestion des données',                     'desc' => 'Conception, organisation et gestion des bases de données.'],
+    'M204' => ['link' => 'tps.php?module=M204', 'title' => 'Développement front-end',                 'desc' => 'Création des interfaces web avec HTML, CSS et JavaScript.'],
+    'M205' => ['link' => 'tps.php?module=M205', 'title' => 'Développement back-end',                  'desc' => 'Développement côté serveur avec PHP et gestion des fonctionnalités web.'],
+    'M206' => ['link' => 'tps.php?module=M206', 'title' => 'Création d’une application Cloud native', 'desc' => 'Développement et déploiement d’applications adaptées au Cloud.'],
 ];
 
 /* ============================== HELPERS ============================== */

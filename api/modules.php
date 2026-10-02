@@ -22,7 +22,7 @@ page_start('Mes Modules', 'Les modules de ma formation en ' . $site['filiere']);
         <h2><?= e($m['title']) ?></h2>
         <p><?= e($m['desc']) ?></p>
         <!-- Clic -> page des TPs de ce module -->
-        <a class="btn" href="tps.php?module=<?= urlencode($code) ?>">Voir les TPs</a>
+        <a class="btn" href="<?= e($m['link'] ?? 'tps.php?module=' . urlencode($code)) ?>">Voir les TPs</a>
       </article>
     <?php endforeach; ?>
   </div>
