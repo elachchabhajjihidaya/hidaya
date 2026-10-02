@@ -7,8 +7,10 @@
 require __DIR__ . '/layout.php';
 
 /* ============================== DATA ============================== */
-$docs = 'docs/';          // dossier des fichiers (PDF, .mdj, .loo ...)
-$imgs = 'images/tps/';    // dossier des photos de TPs (mets-y tes captures d'écran)
+// Ta structure : portfolio/api/tps.php  +  portfolio/public/docs  +  portfolio/public/images
+// Depuis /api/, on remonte d'un niveau avec ../ (comme dans ton ancien code).
+$docs = '../public/docs/';      // PDF, .mdj, .loo ...
+$imgs = '../public/images/';    // photos / captures d'écran des TPs
 
 $tpsData = [
     'M201' => [
@@ -23,7 +25,7 @@ $tpsData = [
                 'title' => 'TP 1 — Les 5 diagrammes (Atelier)',
                 'desc'  => 'Les cinq diagrammes UML réalisés pendant l’atelier.',
                 'tags'  => ['UML'],
-                'image' => '',                          // ex: $imgs . 'tp1.jpg'
+                'image' => '',                          // ex: $imgs . 'tp1.jpg'  (fichier dans public/images/)
                 'file'  => $docs . 'AtelierDiag.pdf',
             ],
             [
@@ -79,13 +81,27 @@ $tpsData = [
                 'title' => 'Atelier 2 — Figma',
                 'desc'  => 'Maquette réalisée avec Figma.',
                 'tags'  => ['Figma', 'UI'],
-                'image' => 'images/Frame 4.jpg',        // ici la photo existe déjà
+                'image' => $imgs . 'Frame 4.jpg',        // ici la photo existe déjà
                 'file'  => '',                          // pas de fichier : la photo suffit
             ],
         ],
     ],
 
-    // 'M202' => [ 'categories' => [...], 'items' => [ [...], [...] ] ],
+    /* ---- MODÈLE pour les autres modules : décommente, copie et remplis ----
+    'M202' => [
+        'categories' => ['agile' => ['📋', 'Agile']],
+        'items' => [
+            [
+                'cat'   => 'agile',
+                'title' => 'TP 1 — Titre du TP',
+                'desc'  => 'Description courte.',
+                'tags'  => ['Scrum'],
+                'image' => $imgs . 'm202_tp1.jpg',     // photo dans public/images/
+                'file'  => $docs . 'm202_tp1.pdf',     // fichier dans public/docs/
+            ],
+        ],
+    ],
+    ----------------------------------------------------------------------- */
 ];
 
 /* ============================== ROUTING ============================== */
