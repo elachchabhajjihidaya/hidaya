@@ -1,7 +1,8 @@
 <?php
 /**
- * index.php: Personal portfolio (single file)
+ * index.php: Personal portfolio
  * Edit the arrays below; the HTML renders from them automatically.
+ * Pages liées : modules.php (cartes des modules) -> tps.php (TPs d'un module), layout.php (commun)
  */
 session_start();
 
@@ -44,6 +45,15 @@ $languages = [
     ['name' => 'Arabic',  'level' => 'Native'],
     ['name' => 'French',  'level' => 'Professional'],
     ['name' => 'English', 'level' => 'Intermediate'],
+];
+
+/* Carte "Mes modules" (clic -> modules.php) */
+$modulesCard = [
+    'icon'  => '📚',
+    'title' => 'Mes modules',
+    'text'  => 'Découvre les modules de ma formation en Développement Digital (Web Full Stack) et les TPs réalisés pour chacun.',
+    'count' => 6,                  // nombre de modules (juste pour l'affichage)
+    'url'   => 'modules.php',
 ];
 
 $projects = [
@@ -229,6 +239,14 @@ header{position:sticky;top:0;z-index:50;background:var(--nav);backdrop-filter:bl
 .skill-head{display:flex;justify-content:space-between;font-weight:600;font-size:.95rem}
 .langs{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));text-align:center}
 .langs h3{color:var(--accent)}
+/* Carte Modules */
+.module-cta{display:flex;align-items:center;gap:1.6rem;max-width:760px;margin:auto;padding:2.2rem;color:var(--text)}
+.module-cta .m-icon{font-size:3.4rem;width:90px;height:90px;flex:none;display:grid;place-items:center;border-radius:24px;background:var(--grad)}
+.module-cta h3{font-size:1.4rem;margin-bottom:.3rem}
+.module-cta p{color:var(--muted);font-size:.95rem;margin-bottom:1rem}
+.module-cta .go{font-weight:600;color:var(--accent)}
+.module-cta:hover .go{letter-spacing:.02em}
+@media(max-width:600px){.module-cta{flex-direction:column;text-align:center}}
 /* Projects */
 .projects{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
 .project{padding:0;overflow:hidden;display:flex;flex-direction:column}
@@ -268,7 +286,7 @@ footer a{color:var(--p300);margin:0 .6rem}
   <nav class="container nav" aria-label="Main navigation">
     <a href="#home" class="logo"><?= e($initials) ?>.</a>
     <ul class="menu" id="menu">
-      <?php foreach (['about'=>'About','education'=>'Education','skills'=>'Skills','languages'=>'Languages','projects'=>'Projects','contact'=>'Contact'] as $id => $label): ?>
+      <?php foreach (['about'=>'About','education'=>'Education','skills'=>'Skills','languages'=>'Languages','modules'=>'Modules','projects'=>'Projects','contact'=>'Contact'] as $id => $label): ?>
         <li><a href="#<?= $id ?>"><?= $label ?></a></li>
       <?php endforeach; ?>
       <li><button class="icon-btn" id="themeBtn" aria-label="Toggle light/dark theme">🌙</button></li>
@@ -286,7 +304,7 @@ footer a{color:var(--p300);margin:0 .6rem}
       <h1><?= e($profile['name']) ?></h1>
       <p><strong><?= e($profile['title']) ?></strong> · <?= e($profile['subtitle']) ?><br>📍 <?= e($profile['location']) ?></p>
       <div class="actions">
-        <a href="#projects" class="btn">View my work</a>
+        <a href="#modules" class="btn">View my work</a>
         <a href="#contact" class="btn outline">Contact me</a>
       </div>
     </div>
@@ -349,6 +367,22 @@ footer a{color:var(--p300);margin:0 .6rem}
         <div class="card reveal"><h3><?= e($l['name']) ?></h3><p><?= e($l['level']) ?></p></div>
       <?php endforeach; ?>
     </div>
+  </div>
+</section>
+
+<!-- ============ MODULES (carte -> modules.php) ============ -->
+<section id="modules">
+  <div class="container">
+    <h2 class="title">Modules</h2>
+    <a class="card module-cta reveal" href="<?= e($modulesCard['url']) ?>">
+      <div class="m-icon" aria-hidden="true"><?= e($modulesCard['icon']) ?></div>
+      <div>
+        <h3><?= e($modulesCard['title']) ?></h3>
+        <p><?= e($modulesCard['text']) ?></p>
+        <span class="chip"><?= (int)$modulesCard['count'] ?> modules</span>
+        <span class="go">&nbsp; Voir mes modules →</span>
+      </div>
+    </a>
   </div>
 </section>
 
