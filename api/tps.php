@@ -7,10 +7,12 @@
 require __DIR__ . '/layout.php';
 
 /* ============================== DATA ============================== */
-// Ta structure : portfolio/api/tps.php  +  portfolio/public/docs  +  portfolio/public/images
-// Depuis /api/, on remonte d'un niveau avec ../ (comme dans ton ancien code).
-$docs = '../public/docs/';      // PDF, .mdj, .loo ...
-$imgs = '../public/images/';    // photos / captures d'écran des TPs
+// Structure : portfolio/api/tps.php  +  portfolio/public/docs  +  portfolio/public/images
+// Sur Vercel, le contenu du dossier "public" est servi à la RACINE du site :
+//   public/images/photo.jpg  ->  https://ton-site/images/photo.jpg
+// Donc on utilise des chemins qui commencent par "/" (et SANS "public" dedans).
+$docs = '/docs/';      // PDF, .mdj, .loo ...
+$imgs = '/images/';    // photos / captures d'écran des TPs
 
 $tpsData = [
     'M201' => [
@@ -87,21 +89,32 @@ $tpsData = [
         ],
     ],
 
-    /* ---- MODÈLE pour les autres modules : décommente, copie et remplis ----
+    // ===================== M202 =====================
     'M202' => [
-        'categories' => ['agile' => ['📋', 'Agile']],
+        'categories' => [
+            'agile' => ['📋', 'Agile'],
+        ],
         'items' => [
             [
                 'cat'   => 'agile',
                 'title' => 'TP 1 — Titre du TP',
-                'desc'  => 'Description courte.',
+                'desc'  => 'Description courte du TP.',
                 'tags'  => ['Scrum'],
-                'image' => $imgs . 'm202_tp1.jpg',     // photo dans public/images/
-                'file'  => $docs . 'm202_tp1.pdf',     // fichier dans public/docs/
+                'image' => $imgs . 'm202_tp1.jpg',     // photo à mettre dans public/images/
+                'file'  => '',                         // ou $docs . 'm202_tp1.pdf' (fichier dans public/docs/)
+            ],
+            [
+                'cat'   => 'agile',
+                'title' => 'TP 2 — Titre du TP',
+                'desc'  => 'Description courte du TP.',
+                'tags'  => ['Agile'],
+                'image' => $imgs . 'm202_tp2.jpg',
+                'file'  => '',
             ],
         ],
     ],
-    ----------------------------------------------------------------------- */
+
+    // Pour M203, M204... : copie le bloc 'M202' ci-dessus, change le nom et les infos.
 ];
 
 /* ============================== ROUTING ============================== */
