@@ -111,6 +111,9 @@ $num = fn(int $n): string => sprintf('%02d', $n);
 /* ============================== CSS (cette page) ============================== */
 $css = <<<'CSS'
 .container{width:min(1150px,92%)}
+/* Les gros chiffres décoratifs ne doivent jamais bloquer les clics */
+.big,.tpn,.at-num,.blob{pointer-events:none}
+.crumb{position:relative;z-index:5;display:inline-block;padding:.4rem .2rem;margin-bottom:.4rem}
 #prog{position:fixed;top:0;left:0;height:3px;width:0;background:var(--grad);z-index:100}
 /* ---------- Hero ---------- */
 .hero2{position:relative;overflow:hidden;padding:4rem 0 3rem;text-align:center;isolation:isolate}
