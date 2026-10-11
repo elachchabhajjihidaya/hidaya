@@ -14,6 +14,17 @@ require __DIR__ . '/layout.php';
 $docs = '/docs/';
 $imgs = '/images/';
 
+/**
+ * photos('m201/atelier1/tp1', 4)  ->  /images/m201/atelier1/tp1-1.jpg ... tp1-4.jpg
+ * (les fichiers doivent s'appeler tp1-1.jpg, tp1-2.jpg, ... dans public/images/m201/atelier1/)
+ */
+function photos(string $base, int $n, string $ext = 'jpg'): array {
+    global $imgs;
+    $list = [];
+    for ($i = 1; $i <= $n; $i++) { $list[] = $imgs . $base . '-' . $i . '.' . $ext; }
+    return $list;
+}
+
 $tpsData = [
 
     /* ===================== M201 ===================== */
@@ -24,6 +35,8 @@ $tpsData = [
             'icon'  => '📐',
             'desc'  => 'MCD, diagrammes de classes et cas d’utilisation réalisés avec Looping et StarUML.',
             'cover' => '',                                   // ex: $imgs . 'atelier1_cover.jpg' (image de la carte)
+            // EXEMPLE plusieurs photos pour un TP :
+            //   'images' => photos('m201/atelier1/tp1', 4),   // = tp1-1.jpg ... tp1-4.jpg dans public/images/m201/atelier1/
             'tps'   => [
                 ['title' => 'TP 1 — Les 5 diagrammes',  'desc' => 'Les cinq diagrammes UML réalisés pendant l’atelier.',        'tags' => ['UML'],                 'image' => '', 'file' => $docs . 'AtelierDiag.pdf'],
                 ['title' => 'TP 2 — MCD ChriwBi3',      'desc' => 'Modèle Conceptuel de Données réalisé avec Looping.',        'tags' => ['MCD', 'Looping'],      'image' => '', 'file' => $docs . 'Chriwbi3_MCD.loo'],
@@ -170,6 +183,12 @@ $css = <<<'CSS'
   .row:nth-child(even) .frame-wrap{order:0}
   .showcase{gap:3.5rem}
 }
+/* Miniatures */
+.thumbs{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;padding:.5rem;background:var(--accent-soft)}
+.th{position:relative;aspect-ratio:1;border:2px solid transparent;border-radius:8px;overflow:hidden;padding:0;cursor:zoom-in;background:var(--card)}
+.th:hover{border-color:var(--accent)}
+.th img{width:100%;height:100%;object-fit:cover}
+.th .more{position:absolute;inset:0;display:grid;place-items:center;background:rgba(26,11,46,.7);color:#fff;font-weight:700}
 /* ---------- Divers ---------- */
 .soon{max-width:640px;margin:2.5rem auto 3rem;text-align:center;border-style:dashed;border-width:2px}
 .soon .bigi{font-size:3.2rem}
@@ -181,6 +200,8 @@ dialog#lb::backdrop{background:rgba(18,7,31,.88);backdrop-filter:blur(5px)}
 #lb figure{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 #lb img{width:100%;max-height:78vh;object-fit:contain;background:#12071F}
 #lb figcaption{padding:1rem 1.4rem;font-weight:600}
+#lb .nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(124,58,237,.9);color:#fff;font-size:1.3rem;cursor:pointer;z-index:2}
+#lb .prev{left:10px}#lb .next{right:10px}
 #lb .x{position:absolute;top:-14px;right:-6px;width:42px;height:42px;border-radius:50%;border:0;background:var(--btn);color:#fff;font-size:1.2rem;cursor:pointer;box-shadow:var(--shadow);z-index:2}
 @media(prefers-reduced-motion:reduce){.blob{animation:none}.at,.frame{transform:none!important}}
 CSS;
@@ -281,21 +302,34 @@ page_start($pageTitle, 'Mes travaux pratiques : ' . $module['title'], $css);
 <div class="container">
   <div class="showcase">
     <?php foreach ($atelier['tps'] as $k => $tp):
-          $img  = !empty($tp['image']) ? fileUrl($tp['image']) : '';
-          $file = !empty($tp['file'])  ? fileUrl($tp['file'])  : '';
+          // Photos du TP : 'images' => [..] (plusieurs)  ou  'image' => '..' (une seule)
+          $pics = array_values(array_filter((array)($tp['images'] ?? ($tp['image'] ?? []))));
+          $pics = array_map('fileUrl', $pics);
+          $file = !empty($tp['file']) ? fileUrl($tp['file']) : '';
           $ext  = strtolower(pathinfo($tp['file'] ?? '', PATHINFO_EXTENSION));
-          $open = in_array($ext, ['pdf', 'jpg', 'jpeg', 'png', 'webp'], true); ?>
+          $open = in_array($ext, ['pdf', 'jpg', 'jpeg', 'png', 'webp'], true);
+          $g    = e(json_encode($pics)); ?>
       <article class="row reveal">
         <div class="frame-wrap">
           <div class="frame">
-            <div class="bar"><i></i><i></i><i></i><span>TP <?= $num($k + 1) ?></span></div>
-            <?php if ($img): ?>
-              <button type="button" class="shot has" data-img="<?= e($img) ?>" data-title="<?= e($tp['title']) ?>" aria-label="Agrandir : <?= e($tp['title']) ?>">
-                <img src="<?= e($img) ?>" alt="Photo du <?= e($tp['title']) ?>" loading="lazy">
+            <div class="bar"><i></i><i></i><i></i><span>TP <?= $num($k + 1) ?><?= count($pics) > 1 ? ' · ' . count($pics) . ' photos' : '' ?></span></div>
+            <?php if ($pics): ?>
+              <button type="button" class="shot has" data-gallery="<?= $g ?>" data-start="0" data-title="<?= e($tp['title']) ?>" aria-label="Agrandir : <?= e($tp['title']) ?>">
+                <img src="<?= e($pics[0]) ?>" alt="Photo du <?= e($tp['title']) ?>" loading="lazy">
                 <span class="zoom">🔍 Agrandir</span>
               </button>
+              <?php if (count($pics) > 1): ?>
+                <div class="thumbs">
+                  <?php foreach (array_slice($pics, 0, 5) as $ti => $u): ?>
+                    <button type="button" class="th" data-gallery="<?= $g ?>" data-start="<?= $ti ?>" data-title="<?= e($tp['title']) ?>" aria-label="Photo <?= $ti + 1 ?>">
+                      <img src="<?= e($u) ?>" alt="" loading="lazy">
+                      <?php if ($ti === 4 && count($pics) > 5): ?><span class="more">+<?= count($pics) - 5 ?></span><?php endif; ?>
+                    </button>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
             <?php else: ?>
-              <div class="shot empty"><div><b><?= e($atelier['icon']) ?></b><span>Photo à ajouter</span></div></div>
+              <div class="shot empty"><div><b><?= e($atelier['icon']) ?></b><span>Photos à ajouter</span></div></div>
             <?php endif; ?>
           </div>
         </div>
@@ -307,7 +341,7 @@ page_start($pageTitle, 'Mes travaux pratiques : ' . $module['title'], $css);
             <div class="tags"><?php foreach ($tp['tags'] as $t): ?><span class="chip"><?= e($t) ?></span><?php endforeach; ?></div>
           <?php endif; ?>
           <div class="actions">
-            <?php if ($img): ?><button type="button" class="btn outline" data-img="<?= e($img) ?>" data-title="<?= e($tp['title']) ?>">Voir la photo</button><?php endif; ?>
+            <?php if ($pics): ?><button type="button" class="btn outline" data-gallery="<?= $g ?>" data-start="0" data-title="<?= e($tp['title']) ?>">Voir les photos<?= count($pics) > 1 ? ' (' . count($pics) . ')' : '' ?></button><?php endif; ?>
             <?php if ($file): ?><a class="btn" href="<?= e($file) ?>" <?= $open ? 'target="_blank" rel="noopener"' : 'download' ?>><?= $open ? 'Ouvrir le fichier' : 'Télécharger' ?></a><?php endif; ?>
           </div>
         </div>
@@ -325,6 +359,8 @@ page_start($pageTitle, 'Mes travaux pratiques : ' . $module['title'], $css);
 <!-- Lightbox (photo en grand) -->
 <dialog id="lb" aria-label="Photo du TP">
   <button class="x" type="button" aria-label="Fermer">✕</button>
+  <button class="nav prev" type="button" aria-label="Photo précédente">‹</button>
+  <button class="nav next" type="button" aria-label="Photo suivante">›</button>
   <figure><img id="lbImg" src="" alt=""><figcaption id="lbCap"></figcaption></figure>
 </dialog>
 
@@ -350,15 +386,23 @@ if (matchMedia('(hover:hover)').matches && !matchMedia('(prefers-reduced-motion:
   });
 }
 
-/* Lightbox */
-const lb = document.getElementById('lb');
-document.querySelectorAll('[data-img]').forEach(el => el.addEventListener('click', () => {
-  document.getElementById('lbImg').src = el.dataset.img;
-  document.getElementById('lbImg').alt = el.dataset.title;
-  document.getElementById('lbCap').textContent = el.dataset.title;
-  lb.showModal();
+/* Lightbox avec galerie (flèches ← → du clavier aussi) */
+const lb = document.getElementById('lb'), lbImg = document.getElementById('lbImg'), lbCap = document.getElementById('lbCap');
+let pics = [], idx = 0, ttl = '';
+const showPic = () => {
+  lbImg.src = pics[idx]; lbImg.alt = ttl;
+  lbCap.textContent = ttl + (pics.length > 1 ? '  (' + (idx + 1) + ' / ' + pics.length + ')' : '');
+  lb.querySelectorAll('.nav').forEach(n => n.hidden = pics.length < 2);
+};
+const step = d => { idx = (idx + d + pics.length) % pics.length; showPic(); };
+document.querySelectorAll('[data-gallery]').forEach(el => el.addEventListener('click', () => {
+  pics = JSON.parse(el.dataset.gallery); idx = +el.dataset.start || 0; ttl = el.dataset.title;
+  showPic(); lb.showModal();
 }));
+lb.querySelector('.prev').addEventListener('click', () => step(-1));
+lb.querySelector('.next').addEventListener('click', () => step(1));
 lb.querySelector('.x').addEventListener('click', () => lb.close());
 lb.addEventListener('click', e => { if (e.target === lb) lb.close(); });
+addEventListener('keydown', e => { if (!lb.open) return; if (e.key === 'ArrowLeft') step(-1); if (e.key === 'ArrowRight') step(1); });
 </script>
 <?php page_end();
