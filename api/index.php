@@ -8,8 +8,8 @@
  *        public/images/m201/atelier1/tp1/   (photos du TP 1 de l'atelier 1 du module M201)
  *        public/images/m201/atelier1/tp2/   ...
  *        public/images/m201/atelier2/tp1/   ...
- *    Elles apparaissent automatiquement. (Si ton hébergeur ne permet pas la lecture
- *    des dossiers, écris les noms à la main dans 'photos' => ['tp1/a.jpg', ...]).
+ *    Elles apparaissent automatiquement, SANS rien écrire dans le code.
+ *    Conseil : nomme-les 1.jpg, 2.jpg, 3.jpg ... (marche partout, même sur Vercel).
  *  - FICHIERS (PDF, .mdj, .loo...) : mets-les dans public/docs/ et écris le nom dans 'file'.
  */
 session_start();
@@ -139,7 +139,7 @@ foreach ($modules as $code => $m) {
                 $photos = array_map(fn($p) => ltrim($p, '/'), $tp['photos']);
             }
             if (!$cover && $photos) $cover = $photos[0];
-            $tps[] = ['title' => $tp['title'], 'desc' => $tp['desc'] ?? '', 'tags' => $tp['tags'] ?? [], 'photos' => $photos, 'file' => $tp['file'] ?? ''];
+            $tps[] = ['title' => $tp['title'], 'desc' => $tp['desc'] ?? '', 'tags' => $tp['tags'] ?? [], 'folder' => $folder, 'photos' => $photos, 'file' => $tp['file'] ?? ''];
         }
         $ats[] = ['title' => $a['title'], 'icon' => $a['icon'] ?? '📁', 'desc' => $a['desc'] ?? '', 'cover' => $a['cover'] ?? $cover, 'tps' => $tps];
     }
@@ -391,8 +391,11 @@ img.broken{visibility:hidden}
 .more{position:absolute;inset:0;display:grid;place-items:center;background:rgba(26,11,46,.7);color:#fff;font-weight:700}
 .tpn{pointer-events:none;display:block;font-size:5rem;font-weight:800;line-height:.9;color:transparent;-webkit-text-stroke:2px var(--p300);opacity:.7;margin-bottom:-.5rem}
 [data-theme="dark"] .tpn{-webkit-text-stroke-color:var(--p400)}
-.info h3{font-size:1.5rem;line-height:1.3;margin-bottom:.5rem}
-.info p{color:var(--muted);margin-bottom:1rem}
+.tinfo{position:relative;min-width:0}
+.tinfo h3{font-size:1.5rem;line-height:1.3;margin-bottom:.5rem}
+.tinfo p{color:var(--muted);margin-bottom:1rem}
+.hint{display:block;margin-top:.6rem;font-size:.72rem;opacity:.95;word-break:break-all}
+.hint a{color:#fff;text-decoration:underline}
 .tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.2rem}
 .acts{display:flex;gap:.6rem;flex-wrap:wrap}
 .pn{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding-bottom:4rem}
@@ -665,6 +668,44 @@ async function openDoc(name) {
   alert('Fichier introuvable : ' + name + '\nVérifie qu’il est bien dans le dossier docs/ (même nom exactement).');
 }
 
+
+/* ---------------- Détection automatique des photos (sans rien écrire dans le code) ----------------
+   Si le serveur ne peut pas lister le dossier, on cherche  1.jpg, 2.jpg, 3.jpg ...  dans le dossier du TP. */
+const PROBE_EXTS = ['jpg', 'jpeg', 'png', 'webp', 'JPG', 'PNG'];
+function canLoad(rel) {
+  return new Promise(res => {
+    const list = goodImg ? [goodImg] : IMG_PREFIXES;
+    let i = 0; const im = new Image();
+    im.onload  = () => { goodImg = list[i]; res(true); };
+    im.onerror = () => { if (++i < list.length) im.src = list[i] + enc(rel); else res(false); };
+    im.src = list[0] + enc(rel);
+  });
+}
+async function probe(folder) {
+  const found = []; let miss = 0;
+  for (let i = 1; i <= 40 && miss < 2; i++) {
+    let hit = null;
+    for (const ext of PROBE_EXTS) { const rel = folder + '/' + i + '.' + ext; if (await canLoad(rel)) { hit = rel; break; } }
+    if (hit) { found.push(hit); miss = 0; } else miss++;
+  }
+  return found;
+}
+function probeAtelier(code, n) {
+  const a = DATA[code].ateliers[n - 1];
+  a.tps.forEach(async (tp, k) => {
+    if (tp.photos.length || !tp.folder || tp.probed) return;
+    tp.probed = true;
+    const found = await probe(tp.folder);
+    if (!found.length) return;
+    tp.photos = found; if (!a.cover) a.cover = found[0];
+    const row = pBody.querySelector(`.row[data-k="${k}"]`);
+    if (row && pBody.dataset.view === code + n) {
+      row.outerHTML = tpRow(code, n, a, tp, k).replace('class="row reveal"', 'class="row reveal show"');
+      loadImgs(pBody);
+    }
+  });
+}
+
 /* ---------------- Rendu du panneau ---------------- */
 const panel = document.getElementById('panel'), pBody = document.getElementById('pBody'),
       pScroll = document.getElementById('pScroll'), pCrumb = document.getElementById('pCrumb');
@@ -703,6 +744,30 @@ function viewModule(code) {
   return hero + body + nav;
 }
 
+function tpRow(code, n, a, tp, k) {
+    const ph = tp.photos || [], open = `data-open="${code}|${n}|${k}|`;
+    const frame = ph.length ? `
+      <button type="button" class="shot has" ${open}0" aria-label="Agrandir : ${esc(tp.title)}"><img data-rel="${esc(ph[0])}" alt="Photo du ${esc(tp.title)}" loading="lazy"><span class="zoom">🔍 Agrandir</span></button>
+      ${ph.length > 1 ? `<div class="thumbs">${ph.slice(0, 5).map((p, j) => `<button type="button" class="th" ${open}${j}" aria-label="Photo ${j + 1}"><img data-rel="${esc(p)}" alt="" loading="lazy">${j === 4 && ph.length > 5 ? `<span class="more">+${ph.length - 5}</span>` : ''}</button>`).join('')}</div>` : ''}`
+      : `<div class="shot empty"><div><b>${esc(a.icon)}</b><span>Photos à ajouter</span>
+        <small class="hint">Dossier : public/images/${esc(tp.folder)}/<br>Noms : 1.jpg, 2.jpg, 3.jpg…<br>Tester : <a href="/images/${enc(tp.folder)}/1.jpg" target="_blank" rel="noopener">/images/…/1.jpg</a> · <a href="/public/images/${enc(tp.folder)}/1.jpg" target="_blank" rel="noopener">/public/images/…/1.jpg</a></small></div></div>`;
+    return `
+    <article class="row reveal" data-k="${k}">
+      <div class="frame-wrap"><div class="frame">
+        <div class="fbar"><i></i><i></i><i></i><span>TP ${pad(k + 1)}${ph.length > 1 ? ' · ' + ph.length + ' photos' : ''}</span></div>${frame}
+      </div></div>
+      <div class="tinfo">
+        <span class="tpn" aria-hidden="true">${pad(k + 1)}</span>
+        <h3>${esc(tp.title)}</h3><p>${esc(tp.desc)}</p>
+        ${tp.tags && tp.tags.length ? `<div class="tags">${tp.tags.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>` : ''}
+        <div class="acts">
+          ${ph.length ? `<button type="button" class="btn outline sm" ${open}0">Voir les photos${ph.length > 1 ? ' (' + ph.length + ')' : ''}</button>` : ''}
+          ${tp.file ? `<button type="button" class="btn sm" data-doc="${esc(tp.file)}">Ouvrir le fichier</button>` : ''}
+        </div>
+      </div>
+    </article>`;
+}
+
 function viewAtelier(code, n) {
   const M = DATA[code], A = M.ateliers, a = A[n - 1];
   pCrumb.textContent = code + ' · Atelier ' + pad(n) + ' · ' + a.title;
@@ -715,28 +780,7 @@ function viewAtelier(code, n) {
         <div class="stats"><span class="chip">📁 ${a.tps.length} TP${a.tps.length > 1 ? 's' : ''}</span></div>
         <nav class="pills" aria-label="Ateliers">${A.map((x, i) => `<a class="pill ${i + 1 === n ? 'active' : ''}" href="${link(code, i + 1)}">Atelier ${pad(i + 1)}</a>`).join('')}</nav>
       </div></section>`;
-  const rows = a.tps.map((tp, k) => {
-    const ph = tp.photos || [], open = `data-open="${code}|${n}|${k}|`;
-    const frame = ph.length ? `
-      <button type="button" class="shot has" ${open}0" aria-label="Agrandir : ${esc(tp.title)}"><img data-rel="${esc(ph[0])}" alt="Photo du ${esc(tp.title)}" loading="lazy"><span class="zoom">🔍 Agrandir</span></button>
-      ${ph.length > 1 ? `<div class="thumbs">${ph.slice(0, 5).map((p, j) => `<button type="button" class="th" ${open}${j}" aria-label="Photo ${j + 1}"><img data-rel="${esc(p)}" alt="" loading="lazy">${j === 4 && ph.length > 5 ? `<span class="more">+${ph.length - 5}</span>` : ''}</button>`).join('')}</div>` : ''}`
-      : `<div class="shot empty"><div><b>${esc(a.icon)}</b><span>Photos à ajouter</span></div></div>`;
-    return `
-    <article class="row reveal">
-      <div class="frame-wrap"><div class="frame">
-        <div class="fbar"><i></i><i></i><i></i><span>TP ${pad(k + 1)}${ph.length > 1 ? ' · ' + ph.length + ' photos' : ''}</span></div>${frame}
-      </div></div>
-      <div class="info">
-        <span class="tpn" aria-hidden="true">${pad(k + 1)}</span>
-        <h3>${esc(tp.title)}</h3><p>${esc(tp.desc)}</p>
-        ${tp.tags && tp.tags.length ? `<div class="tags">${tp.tags.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>` : ''}
-        <div class="acts">
-          ${ph.length ? `<button type="button" class="btn outline sm" ${open}0">Voir les photos${ph.length > 1 ? ' (' + ph.length + ')' : ''}</button>` : ''}
-          ${tp.file ? `<button type="button" class="btn sm" data-doc="${esc(tp.file)}">Ouvrir le fichier</button>` : ''}
-        </div>
-      </div>
-    </article>`;
-  }).join('');
+  const rows = a.tps.map((tp, k) => tpRow(code, n, a, tp, k)).join('');
   const nav = `<div class="pn">${n > 1 ? `<a class="btn outline" href="${link(code, n - 1)}">← Atelier ${pad(n - 1)}</a>` : `<a class="btn outline" href="${link(code)}">← Tous les ateliers</a>`}${n < A.length ? `<a class="btn" href="${link(code, n + 1)}">Atelier ${pad(n + 1)} →</a>` : ''}</div>`;
   return hero + `<div class="showcase">${rows}</div>` + nav;
 }
@@ -748,10 +792,13 @@ function route() {
   const code = m[1].toUpperCase();
   if (!DATA[code]) { location.hash = '#modules'; return; }
   const n = +m[2] || 0;
-  pBody.innerHTML = (n >= 1 && n <= DATA[code].ateliers.length) ? viewAtelier(code, n) : viewModule(code);
+  const isAt = n >= 1 && n <= DATA[code].ateliers.length;
+  pBody.innerHTML = isAt ? viewAtelier(code, n) : viewModule(code);
+  pBody.dataset.view = isAt ? code + n : code;
   panel.hidden = false; document.body.style.overflow = 'hidden';
   pScroll.scrollTop = 0;
   loadImgs(pBody); watch(pBody);
+  if (isAt) probeAtelier(code, n);
 }
 addEventListener('hashchange', route);
 route();
