@@ -78,6 +78,7 @@ $modules = [
         ['title' => 'Atelier 1', 'icon' => '📋', 'desc' => 'Description de l’atelier 1.', 'tps' => [
             ['title' => 'TP 1 — Titre', 'desc' => 'Description du TP.', 'tags' => ['Scrum'], 'file' => ''],
             ['title' => 'TP 2 — Titre', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
+            ['title' => 'TP 3 — Titre', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
         ]],
         ['title' => 'Atelier 2', 'icon' => '🧩', 'desc' => 'Description de l’atelier 2.', 'tps' => [
             ['title' => 'TP 1 — Titre', 'desc' => 'Description du TP.', 'tags' => ['Kanban'], 'file' => ''],
