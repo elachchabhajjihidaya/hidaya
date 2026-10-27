@@ -92,14 +92,7 @@ $modules = [
         ['title' => 'Atelier 5', 'icon' => '🧩', 'desc' => 'Git EFM.', 'tps' => [
             ['title' => 'TP 1 — Titre', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
         ]],
-        ['title' => 'Atelier 6', 'icon' => '👥','desc'  => 'Application web de gestion des stagiaires : inscription, base de données MySQL et photos avec Cloudinary.','tps'   => [
-            ['title' => 'Gestion des stagiaires',
-            'desc'  => 'Application web permettant d’inscrire des stagiaires, d’enregistrer leurs informations dans une base de données MySQL et de gérer leurs photos avec Cloudinary.',
-            'tags'  => ['PHP', 'MySQL', 'Cloudinary', 'Vercel'],
-            'file'  => '',
-            'link'  => 'https://atelier6-stagiaires-kappa.vercel.app/',   // ← lien dyal projet f Vercel
-            'github'=> 'https://github.com/elachchabhajjihidaya/atelier6-stagiaires.git'],                                       // optionnel : lien GitHub
-        ]],
+        ['title' => 'Gestion des stagiaires', 'icon' => '👥','desc'  => 'Application web permettant d’inscrire des stagiaires, d’enregistrer leurs informations dans une base de données MySQL et de gérer leurs photos avec Cloudinary.','link'  => 'https://atelier6-stagiaires-wvwo.vercel.app/'],
     ]],
     'M203' => ['title' => 'Gestion des données',                     'desc' => 'Conception, organisation et gestion des bases de données.',            'ateliers' => []],
     'M204' => ['title' => 'Développement front-end',                 'desc' => 'Création des interfaces web avec HTML, CSS et JavaScript.',            'ateliers' => []],
