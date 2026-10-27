@@ -10,6 +10,7 @@
  *        public/images/m201/atelier2/tp1/   ...
  *    Elles apparaissent automatiquement, SANS rien écrire dans le code.
  *    Conseil : nomme-les 1.jpg, 2.jpg, 3.jpg ... (marche partout, même sur Vercel).
+ *  - PROJET EN LIGNE (Vercel...) : ajoute 'link' => 'https://mon-projet.vercel.app' (et 'github' => 'https://github.com/...') dans le TP.
  *  - FICHIERS (PDF, .mdj, .loo...) : mets-les dans public/docs/ et écris le nom dans 'file'.
  */
 session_start();
@@ -56,6 +57,7 @@ $filiere = 'Développement Digital — Option Web Full Stack';
 
 /* ---------- MODULES -> ATELIERS -> TPs ----------
  * Chaque TP : title, desc, tags (optionnel), file (optionnel, dans public/docs/),
+ *             link (optionnel : site hébergé, ex: Vercel), github (optionnel : lien du dépôt),
  *             photos (optionnel, noms à la main si le scan automatique ne marche pas)
  * Dossier des photos du TP = images/{module}/atelier{N}/tp{K}/   (N et K = position dans la liste)
  */
@@ -92,7 +94,12 @@ $modules = [
         ['title' => 'Atelier 5', 'icon' => '🧩', 'desc' => 'Git EFM.', 'tps' => [
             ['title' => 'TP 1 — Titre', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
         ]],
-        ['title' => 'Gestion des stagiaires', 'icon' => '👥','desc'  => 'Application web permettant d’inscrire des stagiaires, d’enregistrer leurs informations dans une base de données MySQL et de gérer leurs photos avec Cloudinary.','link'  => 'https://atelier6-stagiaires-wvwo.vercel.app/'],
+
+        // ATELIER 6 = PROJET EN LIGNE : pas de 'tps', juste un 'link'.
+        // Clic sur la carte => ouvre directement le projet (Vercel) dans un nouvel onglet.
+        ['title' => 'Gestion des stagiaires', 'icon' => '👥',
+         'desc'  => 'Application web permettant d’inscrire des stagiaires, d’enregistrer leurs informations dans une base de données MySQL et de gérer leurs photos avec Cloudinary.',
+         'link'  => 'https://atelier6-stagiaires-wvwo.vercel.app/'],
     ]],
     'M203' => ['title' => 'Gestion des données',                     'desc' => 'Conception, organisation et gestion des bases de données.',            'ateliers' => []],
     'M204' => ['title' => 'Développement front-end',                 'desc' => 'Création des interfaces web avec HTML, CSS et JavaScript.',            'ateliers' => []],
@@ -138,21 +145,27 @@ $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? '';
 $imgRoot = find_dir([__DIR__ . '/public/images', __DIR__ . '/../public/images', __DIR__ . '/images', $docRoot . '/images', $docRoot . '/public/images']);
 
 /* Construit les données envoyées au JavaScript (modules -> ateliers -> TPs + photos) */
+$safeUrl = fn($u) => preg_match('#^https?://#i', (string)$u) ? (string)$u : '';   // liens externes : http(s) seulement
 $DATA = [];
 foreach ($modules as $code => $m) {
     $ats = [];
     foreach ($m['ateliers'] as $ai => $a) {
         $tps = []; $cover = '';
-        foreach ($a['tps'] as $ti => $tp) {
+        foreach (($a['tps'] ?? []) as $ti => $tp) {
             $folder = $tp['folder'] ?? strtolower($code) . '/atelier' . ($ai + 1) . '/tp' . ($ti + 1);
             $photos = scan_photos($imgRoot, $folder);
             if (!$photos && !empty($tp['photos'])) {
                 $photos = array_map(fn($p) => ltrim($p, '/'), $tp['photos']);
             }
             if (!$cover && $photos) $cover = $photos[0];
-            $tps[] = ['title' => $tp['title'], 'desc' => $tp['desc'] ?? '', 'tags' => $tp['tags'] ?? [], 'folder' => $folder, 'photos' => $photos, 'file' => $tp['file'] ?? ''];
+            $tps[] = ['title' => $tp['title'], 'desc' => $tp['desc'] ?? '', 'tags' => $tp['tags'] ?? [], 'folder' => $folder, 'photos' => $photos, 'file' => $tp['file'] ?? '',
+                     'link' => $safeUrl($tp['link'] ?? ''), 'github' => $safeUrl($tp['github'] ?? '')];
         }
-        $ats[] = ['title' => $a['title'], 'icon' => $a['icon'] ?? '📁', 'desc' => $a['desc'] ?? '', 'cover' => $a['cover'] ?? $cover, 'tps' => $tps];
+        $aFolder = strtolower($code) . '/atelier' . ($ai + 1);          // ex: m205/atelier6  (capture d'écran du projet)
+        $aCover  = $a['cover'] ?? $cover;
+        if (!$aCover) { $cp = scan_photos($imgRoot, $aFolder); $aCover = $cp[0] ?? ''; }
+        $ats[] = ['title' => $a['title'], 'icon' => $a['icon'] ?? '📁', 'desc' => $a['desc'] ?? '', 'cover' => $aCover, 'folder' => $aFolder,
+                  'link' => $safeUrl($a['link'] ?? ''), 'tps' => $tps];
     }
     $DATA[$code] = ['title' => $m['title'], 'desc' => $m['desc'], 'ateliers' => $ats];
 }
@@ -522,7 +535,7 @@ dialog#lb::backdrop{background:rgba(18,7,31,.88);backdrop-filter:blur(5px)}
     <div class="grid mods">
       <?php foreach ($DATA as $code => $m):
             $nA = count($m['ateliers']);
-            $nT = array_sum(array_map(fn($a) => count($a['tps']), $m['ateliers'])); ?>
+            $nT = array_sum(array_map(fn($a) => count($a['tps'] ?? []), $m['ateliers'])); ?>
         <article class="card mod reveal">
           <span class="code"><?= e($code) ?></span>
           <h3><?= e($m['title']) ?></h3>
@@ -717,6 +730,21 @@ function probeAtelier(code, n) {
   });
 }
 
+function probeCovers(code) {
+  DATA[code].ateliers.forEach(async (a, i) => {
+    if (a.cover || !a.link || a.probedCover) return;
+    a.probedCover = true;
+    const found = await probe(a.folder);                       // cherche 1.jpg, 2.jpg... dans public/images/m205/atelier6/
+    if (!found.length) return;
+    a.cover = found[0];
+    const card = pBody.querySelectorAll('.at')[i];
+    if (card && pBody.dataset.view === code) {
+      const bg = card.querySelector('.at-bg'), img = document.createElement('img');
+      img.className = 'at-bg'; img.alt = ''; bg.replaceWith(img); loadImg(img, found[0]);
+    }
+  });
+}
+
 /* ---------------- Rendu du panneau ---------------- */
 const panel = document.getElementById('panel'), pBody = document.getElementById('pBody'),
       pScroll = document.getElementById('pScroll'), pCrumb = document.getElementById('pCrumb');
@@ -740,13 +768,15 @@ function viewModule(code) {
   } else {
     body = `<p class="sec-title">Choisis un atelier pour découvrir ses TPs ↓</p><div class="at-grid">` +
       A.map((a, i) => `
-      <a class="at reveal" href="${link(code, i + 1)}" style="--g:${GRADS[i % GRADS.length]}" aria-label="Ouvrir l’atelier ${i + 1} : ${esc(a.title)}">
+      <a class="at reveal" href="${a.link ? esc(a.link) : link(code, i + 1)}" ${a.link ? 'target="_blank" rel="noopener"' : ''} style="--g:${GRADS[i % GRADS.length]}" aria-label="${a.link ? 'Voir le projet : ' : 'Ouvrir l’atelier ' + (i + 1) + ' : '}${esc(a.title)}">
         ${a.cover ? `<img class="at-bg" data-rel="${esc(a.cover)}" alt="" loading="lazy">` : `<div class="at-bg pat"><span>${esc(a.icon)}</span></div>`}
         <span class="at-num" aria-hidden="true">${pad(i + 1)}</span>
         <div class="at-body">
           <span class="chip glass">Atelier ${pad(i + 1)}</span>
           <h2>${esc(a.title)}</h2><p>${esc(a.desc)}</p>
-          <div class="at-foot"><span>📁 ${a.tps.length} TP${a.tps.length > 1 ? 's' : ''}</span><span class="arrow">Ouvrir →</span></div>
+          <div class="at-foot">${a.link
+            ? `<span>🌐 Projet en ligne</span><span class="arrow">Voir le projet ↗</span>`
+            : `<span>📁 ${a.tps.length} TP${a.tps.length > 1 ? 's' : ''}</span><span class="arrow">Ouvrir →</span>`}</div>
         </div>
       </a>`).join('') + `</div>`;
   }
@@ -774,6 +804,8 @@ function tpRow(code, n, a, tp, k) {
         <div class="acts">
           ${ph.length ? `<button type="button" class="btn outline sm" ${open}0">Voir les photos${ph.length > 1 ? ' (' + ph.length + ')' : ''}</button>` : ''}
           ${tp.file ? `<button type="button" class="btn sm" data-doc="${esc(tp.file)}">Ouvrir le fichier</button>` : ''}
+          ${tp.link ? `<a class="btn sm" href="${esc(tp.link)}" target="_blank" rel="noopener">🔗 Voir le projet</a>` : ''}
+          ${tp.github ? `<a class="btn outline sm" href="${esc(tp.github)}" target="_blank" rel="noopener">GitHub</a>` : ''}
         </div>
       </div>
     </article>`;
@@ -803,13 +835,13 @@ function route() {
   const code = m[1].toUpperCase();
   if (!DATA[code]) { location.hash = '#modules'; return; }
   const n = +m[2] || 0;
-  const isAt = n >= 1 && n <= DATA[code].ateliers.length;
+  const isAt = n >= 1 && n <= DATA[code].ateliers.length && DATA[code].ateliers[n - 1].tps.length > 0;
   pBody.innerHTML = isAt ? viewAtelier(code, n) : viewModule(code);
   pBody.dataset.view = isAt ? code + n : code;
   panel.hidden = false; document.body.style.overflow = 'hidden';
   pScroll.scrollTop = 0;
   loadImgs(pBody); watch(pBody);
-  if (isAt) probeAtelier(code, n);
+  if (isAt) probeAtelier(code, n); else probeCovers(code);
 }
 addEventListener('hashchange', route);
 route();
