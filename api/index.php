@@ -75,13 +75,16 @@ $modules = [
         ]],
     ]],
     'M202' => ['title' => 'Approche agile', 'desc' => 'Méthodes et pratiques agiles utilisées dans la gestion des projets.', 'ateliers' => [
-        ['title' => 'Atelier 1', 'icon' => '📋', 'desc' => 'Description de l’atelier 1.', 'tps' => [
-            ['title' => 'TP 1 — Titre', 'desc' => 'Description du TP.', 'tags' => ['Scrum'], 'file' => ''],
-            ['title' => 'TP 2 — Titre', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
-            ['title' => 'TP 3 — Titre', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
+        ['title' => 'Atelier 1', 'icon' => '📋', 'desc' => 'Gestion de projet: Méthodes classiques', 'tps' => [
+            ['title' => 'TP 1 — Approche Agile1', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
+            ['title' => 'TP 2 — Approche Agile2', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
+            ['title' => 'TP 3 — Approche Agile3', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
         ]],
-        ['title' => 'Atelier 2', 'icon' => '🧩', 'desc' => 'Description de l’atelier 2.', 'tps' => [
-            ['title' => 'TP 1 — Titre', 'desc' => 'Description du TP.', 'tags' => ['Kanban'], 'file' => ''],
+        ['title' => 'Atelier 2', 'icon' => '🧩', 'desc' => 'Gestion de projet Agile.', 'tps' => [
+            ['title' => 'TP 1 — Agile et Scrum', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
+        ]],
+        ['title' => 'Atelier 3', 'icon' => '🧩', 'desc' => 'Les bases de Git.', 'tps' => [
+            ['title' => 'TP 1 — Titre', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
         ]],
     ]],
     'M203' => ['title' => 'Gestion des données',                     'desc' => 'Conception, organisation et gestion des bases de données.',            'ateliers' => []],
