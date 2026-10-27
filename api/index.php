@@ -83,7 +83,13 @@ $modules = [
         ['title' => 'Atelier 2', 'icon' => '🧩', 'desc' => 'Gestion de projet Agile.', 'tps' => [
             ['title' => 'TP 1 — Agile et Scrum', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
         ]],
-        ['title' => 'Atelier 3', 'icon' => '🧩', 'desc' => 'Les bases de Git.', 'tps' => [
+        ['title' => 'Atelier 3', 'icon' => '🧩', 'desc' => 'Les bases de Gitè.', 'tps' => [
+            ['title' => 'TP 1 — Titre', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
+        ]],
+        ['title' => 'Atelier 4', 'icon' => '🧩', 'desc' => 'Les bases de Gitè.', 'tps' => [
+            ['title' => 'TP 1 — Titre', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
+        ]],
+        ['title' => 'Atelier 5', 'icon' => '🧩', 'desc' => 'Git EFM.', 'tps' => [
             ['title' => 'TP 1 — Titre', 'desc' => 'Description du TP.', 'tags' => ['Agile'], 'file' => ''],
         ]],
     ]],
