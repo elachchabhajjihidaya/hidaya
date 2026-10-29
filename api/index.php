@@ -109,9 +109,17 @@ $modules = [
 ];
 
 $projects = [
-    ['title' => 'Project 1 title', 'problem' => 'Describe the problem this project solves.', 'solution' => 'Describe how you solved it.', 'result' => 'Describe the outcome (users, speed, grade...).', 'tools' => ['HTML', 'CSS', 'PHP', 'MySQL'], 'link' => '#modules', 'image' => ''],
+    ['title' => 'Projet Vendo', 'problem' => 'Organiser les différentes étapes du projet Vendo.', 'solution' => 'Méthode en cascade, gestion agile et développement web.', 'result' => 'Retrouvez les travaux du projet dans les quatre rubriques.', 'tools' => ['HTML', 'CSS', 'PHP', 'MySQL'], 'link' => '#/vendo', 'image' => '/images/vendo-logo.jpeg', 'button' => 'Vue le projet', 'class' => 'vendo-project'],
     ['title' => 'Project 2 title', 'problem' => 'Describe the problem this project solves.', 'solution' => 'Describe how you solved it.', 'result' => 'Describe the outcome.',                    'tools' => ['JavaScript', 'CSS'],          'link' => '#modules', 'image' => ''],
     ['title' => 'Project 3 title', 'problem' => 'Describe the problem this project solves.', 'solution' => 'Describe how you solved it.', 'result' => 'Describe the outcome.',                    'tools' => ['PHP', 'MySQL', 'Git'],        'link' => '#modules', 'image' => ''],
+];
+
+// Ajouter les documents dans public/docs/, puis renseigner leur nom dans "file".
+$vendoDocuments = [
+    ['title' => 'Méthode en cascade', 'file' => ''],
+    ['title' => 'Gestion agile', 'file' => ''],
+    ['title' => 'Vendo statique', 'file' => ''],
+    ['title' => 'Vendo dynamique', 'file' => ''],
 ];
 
 $seo = [
@@ -322,6 +330,16 @@ header{position:sticky;top:0;z-index:50;background:var(--nav);backdrop-filter:bl
 .p-body p{font-size:.9rem;color:var(--muted)}
 .tools{display:flex;flex-wrap:wrap;gap:.4rem}
 .p-body .btn{margin-top:auto;align-self:flex-start;padding:.5rem 1.2rem;font-size:.85rem}
+.vendo-project .thumb{background:#4d301e}
+.vendo-project .thumb img{object-fit:contain}
+.vendo-project h3{font-weight:800}
+.vendo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5rem;padding-bottom:3rem}
+.vendo-card{display:flex;flex-direction:column;align-items:flex-start;gap:1rem}
+.vendo-card h2{font-size:1.25rem}
+.vendo-card p{color:var(--muted)}
+.vendo-card .btn{margin-top:auto}
+.vendo-card .btn:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none}
+@media(max-width:600px){.vendo-grid{grid-template-columns:1fr}}
 /* ---------- Contact ---------- */
 .contact-wrap{display:grid;gap:2rem;grid-template-columns:1fr 1.3fr}
 @media(max-width:800px){.contact-wrap{grid-template-columns:1fr}}
@@ -557,7 +575,7 @@ dialog#lb::backdrop{background:rgba(18,7,31,.88);backdrop-filter:blur(5px)}
     <h2 class="title">Projects</h2>
     <div class="grid projects">
       <?php foreach ($projects as $p): ?>
-        <article class="card project reveal">
+        <article class="card project reveal <?= e($p['class'] ?? '') ?>">
           <div class="thumb"><?php if ($p['image']): ?><img src="<?= e($p['image']) ?>" alt="<?= e($p['title']) ?> screenshot" loading="lazy"><?php else: ?>&lt;/&gt;<?php endif; ?></div>
           <div class="p-body">
             <h3><?= e($p['title']) ?></h3>
@@ -565,7 +583,7 @@ dialog#lb::backdrop{background:rgba(18,7,31,.88);backdrop-filter:blur(5px)}
             <div><h4>Solution</h4><p><?= e($p['solution']) ?></p></div>
             <div><h4>Result</h4><p><?= e($p['result']) ?></p></div>
             <div class="tools"><?php foreach ($p['tools'] as $t): ?><span class="chip"><?= e($t) ?></span><?php endforeach; ?></div>
-            <a class="btn" href="<?= e($p['link']) ?>">View project →</a>
+            <a class="btn" href="<?= e($p['link']) ?>"><?= e($p['button'] ?? 'View project →') ?></a>
           </div>
         </article>
       <?php endforeach; ?>
@@ -656,6 +674,7 @@ watch();
 
 /* ---------------- Données (venant de PHP) ---------------- */
 const DATA = <?= json_encode($DATA, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+const VENDO_DOCUMENTS = <?= json_encode($vendoDocuments, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 const CODES = Object.keys(DATA);
 const GRADS = ['linear-gradient(135deg,#7C3AED,#C4A6FF)','linear-gradient(135deg,#4C1D95,#A678FF)','linear-gradient(135deg,#8B5CF6,#E9DDFF)','linear-gradient(135deg,#2E1065,#7C3AED)'];
 
@@ -829,7 +848,28 @@ function viewAtelier(code, n) {
 }
 
 /* ---------------- Routeur (adresse #/m201  ou  #/m201/2) ---------------- */
+function viewVendo() {
+  pCrumb.textContent = 'Projet Vendo';
+  return '<section class="hero2" lang="fr"><span class="kicker">Projet Vendo</span><h1>Les travaux du projet</h1><p class="lead">De la gestion du projet au développement web.</p></section>' +
+    '<div class="vendo-grid" lang="fr">' + VENDO_DOCUMENTS.map((doc, i) =>
+      `<article class="card vendo-card"><span class="chip">0${i + 1}</span><h2>${esc(doc.title)}</h2>
+      <p>${doc.file ? 'Consultez le document de cette rubrique.' : 'Document à venir.'}</p>
+      <button class="btn" type="button" ${doc.file ? `data-doc="${esc(doc.file)}"` : 'disabled'} aria-label="Consulter : ${esc(doc.title)}">Consulter</button></article>`
+    ).join('') + '</div>';
+}
 function route() {
+  if (location.hash === '#/vendo') {
+    pBody.innerHTML = viewVendo();
+    pBody.dataset.view = 'vendo';
+    panel.setAttribute('aria-label', 'Projet Vendo');
+    panel.hidden = false;
+    document.body.style.overflow = 'hidden';
+    pScroll.scrollTop = 0;
+    document.getElementById('prog').style.width = '0%';
+    document.getElementById('pClose').focus();
+    return;
+  }
+  panel.setAttribute('aria-label', 'Modules, ateliers et TPs');
   const m = location.hash.match(/^#\/(m\d+)(?:\/(\d+))?$/i);
   if (!m) { panel.hidden = true; document.body.style.overflow = ''; return; }
   const code = m[1].toUpperCase();
@@ -846,12 +886,13 @@ function route() {
 addEventListener('hashchange', route);
 route();
 
-document.getElementById('pClose').addEventListener('click', () => { location.hash = '#modules'; });
+const panelHome = () => pBody.dataset.view === 'vendo' ? '#projects' : '#modules';
+document.getElementById('pClose').addEventListener('click', () => { location.hash = panelHome(); });
 document.getElementById('pBack').addEventListener('click', () => {
   const m = location.hash.match(/^#\/(m\d+)\/(\d+)$/i);
-  location.hash = m ? '#/' + m[1] : '#modules';          // atelier -> module -> accueil
+  location.hash = m ? '#/' + m[1] : panelHome();          // atelier -> module -> accueil
 });
-addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden && !lb.open) location.hash = '#modules'; });
+addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden && !lb.open) location.hash = panelHome(); });
 
 /* Barre de progression + effet 3D des cartes + clics (photos / fichiers) */
 pScroll.addEventListener('scroll', () => {
