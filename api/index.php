@@ -330,8 +330,8 @@ header{position:sticky;top:0;z-index:50;background:var(--nav);backdrop-filter:bl
 .p-body p{font-size:.9rem;color:var(--muted)}
 .tools{display:flex;flex-wrap:wrap;gap:.4rem}
 .p-body .btn{margin-top:auto;align-self:flex-start;padding:.5rem 1.2rem;font-size:.85rem}
-.vendo-project .thumb{background:#4d301e}
-.vendo-project .thumb img{object-fit:contain}
+.vendo-project .thumb{background:var(--grad);height:170px;flex:0 0 170px;min-height:0;overflow:hidden;padding:20px}
+.vendo-project .thumb img{width:130px;height:130px;max-width:100%;max-height:100%;object-fit:contain;border-radius:24px}
 .vendo-project h3{font-weight:800}
 .vendo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5rem;padding-bottom:3rem}
 .vendo-card{display:flex;flex-direction:column;align-items:flex-start;gap:1rem}
