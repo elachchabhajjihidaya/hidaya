@@ -869,11 +869,12 @@ function viewVendo() {
   return '<section class="hero2" lang="fr"><span class="kicker">Projet Vendo</span><h1>Les travaux du projet</h1><p class="lead">De la gestion du projet au développement web.</p></section>' +
     '<div class="vendo-grid" lang="fr">' + VENDO_DOCUMENTS.map((doc, i) => {
       const files = (doc.files || (doc.file ? [{ label: 'Consulter le document', file: doc.file }] : []));
-      const isExternal = doc.url && /^https:\/\//i.test(doc.url) && !doc.url.includes('YOUR-');
+      const externalUrl = /^https?:\/\/\S+$/i.test(doc.url || '') ? doc.url : '';
+      const isExternal = Boolean(externalUrl);
       const actions = files.map(item => `<button class="btn" type="button" data-doc="${esc(item.file)}">${esc(item.label)}</button>`).join(' ');
       return `<article class="card vendo-card"><span class="chip">0${i + 1}</span><h2>${esc(doc.title)}</h2>
       <p>${files.length ? 'Téléchargez ou consultez les documents de cette rubrique.' : isExternal ? 'Ouvrir le lien du projet.' : 'Ajoutez le lien dans api/index.php.'}</p>
-      ${files.length ? actions : isExternal ? `<a class="btn" href="${esc(doc.url)}" target="_blank" rel="noopener noreferrer">Consulter</a>` : '<button class="btn" type="button" disabled>Ajouter le lien</button>'}</article>`;
+      ${files.length ? actions : isExternal ? `<a class="btn" href="${esc(externalUrl)}" target="_blank" rel="noopener noreferrer">Consulter</a>` : '<button class="btn" type="button" disabled>Ajouter le lien</button>'}</article>`;
     }).join('') + '</div>';
 }
 function route() {
