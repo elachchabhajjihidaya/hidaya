@@ -116,10 +116,13 @@ $projects = [
 
 // Ajouter les documents dans public/docs/, puis renseigner leur nom dans "file".
 $vendoDocuments = [
-    ['title' => 'Méthode en cascade', 'file' => ''],
-    ['title' => 'Gestion agile', 'file' => ''],
-    ['title' => 'Vendo statique', 'file' => ''],
-    ['title' => 'Vendo dynamique', 'file' => ''],
+    ['title' => 'Méthode en cascade', 'files' => [
+        ['label' => 'Présentation PowerPoint', 'file' => 'Notre plateforme.pptx'],
+        ['label' => 'Document PDF', 'file' => 'Planification du projet VENDO.pdf'],
+    ]],
+    ['title' => 'Gestion agile', 'url' => 'https://YOUR-JIRA-URL-HERE'],
+    ['title' => 'Vendo statique', 'url' => 'https://YOUR-VENDO-STATIC-URL-HERE'],
+    ['title' => 'Vendo dynamique', 'url' => 'https://YOUR-VENDO-DYNAMIC-URL-HERE'],
 ];
 
 $seo = [
@@ -851,11 +854,14 @@ function viewAtelier(code, n) {
 function viewVendo() {
   pCrumb.textContent = 'Projet Vendo';
   return '<section class="hero2" lang="fr"><span class="kicker">Projet Vendo</span><h1>Les travaux du projet</h1><p class="lead">De la gestion du projet au développement web.</p></section>' +
-    '<div class="vendo-grid" lang="fr">' + VENDO_DOCUMENTS.map((doc, i) =>
-      `<article class="card vendo-card"><span class="chip">0${i + 1}</span><h2>${esc(doc.title)}</h2>
-      <p>${doc.file ? 'Consultez le document de cette rubrique.' : 'Document à venir.'}</p>
-      <button class="btn" type="button" ${doc.file ? `data-doc="${esc(doc.file)}"` : 'disabled'} aria-label="Consulter : ${esc(doc.title)}">Consulter</button></article>`
-    ).join('') + '</div>';
+    '<div class="vendo-grid" lang="fr">' + VENDO_DOCUMENTS.map((doc, i) => {
+      const files = (doc.files || (doc.file ? [{ label: 'Consulter le document', file: doc.file }] : []));
+      const isExternal = doc.url && /^https:\/\//i.test(doc.url) && !doc.url.includes('YOUR-');
+      const actions = files.map(item => `<button class="btn" type="button" data-doc="${esc(item.file)}">${esc(item.label)}</button>`).join(' ');
+      return `<article class="card vendo-card"><span class="chip">0${i + 1}</span><h2>${esc(doc.title)}</h2>
+      <p>${files.length ? 'Téléchargez ou consultez les documents de cette rubrique.' : isExternal ? 'Ouvrir le lien du projet.' : 'Ajoutez le lien dans api/index.php.'}</p>
+      ${files.length ? actions : isExternal ? `<a class="btn" href="${esc(doc.url)}" target="_blank" rel="noopener noreferrer">Consulter</a>` : '<button class="btn" type="button" disabled>Ajouter le lien</button>'}</article>`;
+    }).join('') + '</div>';
 }
 function route() {
   if (location.hash === '#/vendo') {
