@@ -120,9 +120,9 @@ $vendoDocuments = [
         ['label' => 'Présentation PowerPoint', 'file' => 'Notre plateforme.pptx'],
         ['label' => 'Document PDF', 'file' => 'Planification du projet VENDO.pdf'],
     ]],
-    ['title' => 'Gestion agile', 'url' => 'https://YOUR-JIRA-URL-HERE'],
-    ['title' => 'Vendo statique', 'url' => 'https://YOUR-VENDO-STATIC-URL-HERE'],
-    ['title' => 'Vendo dynamique', 'url' => 'https://YOUR-VENDO-DYNAMIC-URL-HERE'],
+    ['title' => 'Gestion agile', 'url' => 'https://elachchabhajjihidaya.atlassian.net/jira/software/projects/VEN/boards/2/backlog?atlOrigin=eyJpIjoiZTgyM2E0NmU3MDQ4NGUzMjkxOGNhMDhhYmQ0NzJjMWYiLCJwIjoiaiJ9'],
+    ['title' => 'Vendo statique', 'url' => 'https://projetvendo.vercel.app/'],
+    ['title' => 'Vendo dynamique', 'url' => 'https://projet-vendo-dynamique-12.vercel.app/'],
 ];
 
 $seo = [
@@ -703,14 +703,27 @@ const loadImgs = scope => scope.querySelectorAll('img[data-rel]').forEach(i => l
 
 let goodDoc = null;
 async function openDoc(name) {
+  // Réserver l'onglet pendant le clic pour éviter le blocage du popup après fetch().
+  const preview = window.open('about:blank', '_blank');
+  if (preview) preview.opener = null;
   const list = goodDoc ? [goodDoc, ...DOC_PREFIXES.filter(p => p !== goodDoc)] : DOC_PREFIXES;
   for (const p of list) {
     const url = p + enc(name);
     try {
       const r = await fetch(url, { method: 'HEAD' });
-      if (r.ok && !(r.headers.get('content-type') || '').includes('text/html')) { goodDoc = p; window.open(url, '_blank', 'noopener'); return; }
+      if (r.ok && !(r.headers.get('content-type') || '').includes('text/html')) {
+        goodDoc = p;
+        const isPowerPoint = /\.pptx?$/i.test(name);
+        const destination = isPowerPoint
+          ? 'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(new URL(url, window.location.href).href)
+          : new URL(url, window.location.href).href;
+        if (preview) preview.location.replace(destination);
+        else window.location.href = destination;
+        return;
+      }
     } catch (e) {}
   }
+  if (preview) preview.close();
   alert('Fichier introuvable : ' + name + '\nVérifie qu’il est bien dans le dossier docs/ (même nom exactement).');
 }
 
